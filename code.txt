@@ -1,0 +1,158 @@
+/////order details/////
+import axios from 'axios'
+import React, { useEffect, useState } from 'react'
+import { Card, Col, Container, Row } from 'react-bootstrap'
+import { useParams } from 'react-router-dom'
+
+const OrderDetails = () => {
+    const { orderid } = useParams()
+    const [orderDetails, setorderDetails] = useState({})
+
+    useEffect(() => {
+        const data = {
+            oid: orderid
+        }
+        axios.post('http://localhost:5000/api/getorderbyid', data)
+            .then((result) => {
+                setorderDetails({ ...result.data })
+                console.log("DATA", result.data)
+            }).catch((err) => {
+                console.log(err)
+            })
+    }, [])
+
+
+    return (
+        <>
+            <h1>DETAILS</h1>
+            <h3>{orderDetails?.UserId?.CustomerMob}</h3>
+            <h3>{orderDetails?.UserId?.CustomerEmail}</h3>
+            <h2>Order Items</h2>
+            <div>
+                <Container>
+                    <Row>
+                        {
+                            orderDetails?.OrderItems?.map((food) => {
+                                return (
+                                    <Col>
+                                        <Card>
+                                            <Card.Img className='food-image' src={`http://localhost:5000${food.FoodId.FoodImage}`} />
+                                            <Card.Body>
+                                                <h5>{food.FoodId.FoodName}</h5>
+                                                <h5>{food.FoodId.FoodPrice}</h5>
+                                                <h5>Quantity {food.Qty}</h5>
+                                                
+                                            </Card.Body>
+                                        </Card>
+                                    </Col>
+                                )
+                            })
+                        }
+                    </Row>
+                </Container>
+
+            </div>
+        </>
+
+    )
+}
+
+export default OrderDetails
+
+
+//////MyAllOrders//////
+import axios from 'axios'
+import React, { useEffect, useState } from 'react'
+import { Button, Card, Col, Container, Row } from 'react-bootstrap'
+import { useNavigate } from 'react-router-dom'
+
+
+function MyAllOrder() {
+  const [orderData, setorderData] = useState([])
+  const navi = useNavigate()
+
+  useEffect(() => {
+    axios.get('http://localhost:5000/api/allorder')
+      .then((result) => {
+        setorderData(result.data)
+      }).catch((err) => {
+        console.log(err)
+      })
+  }, [])
+
+  return (
+    <div>
+      <Container>
+        <Row>
+          {
+            orderData.map((order) => {
+              return (
+                <Col lg={3} sm={12} md={6}>
+                  <Card>
+                    <Card.Body>
+                      <h5>{order.orderDate}</h5>
+                      <h5>{order.orderStatus}</h5>
+                      <h5>{order.NoOfItems}</h5>
+                      <h5>{order.TotalAmt}</h5>
+                    </Card.Body>
+                    <Card.Footer>
+                      <Button onClick={() => navi(`/orderdetails/${order._id}`)}>Details</Button>
+                    </Card.Footer>
+                  </Card>
+                </Col>
+              )
+            })
+          }
+        </Row>
+      </Container>
+    </div>
+  )
+}
+
+export default MyAllOrder
+
+
+
+/////MyRoutes/////
+import React from 'react'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import MyDashboard from './MyDashboard'
+import MyAddFood from './MyAddFood'
+import MyAllFood from './MyAllFood'
+import MyAllCustomer from './MyAllCustomer'
+import MyAllOrder from './MyAllOrder'
+import MyNavBar from './MyNavBar'
+import OrderDetails from './OrderDetails'
+
+
+function MyRoutes() {
+  return (
+    <div>
+      <Router>
+        <MyNavBar />
+        <Routes>
+          <Route path='/' element={<MyDashboard />} />
+          <Route path='/addfoods' element={<MyAddFood />} />
+          <Route path='/allfoods' element={<MyAllFood />} />
+          <Route path='/allorders' element={<MyAllOrder />} />
+          <Route path='/allcustomers' element={<MyAllCustomer />} />
+          <Route path='/orderdetails/:orderid' element={<OrderDetails />} />
+        </Routes>
+      </Router>
+    </div>
+  )
+}
+
+export default MyRoutes
+
+///Order Controll add this method////
+exports.getOrderbyId = (req, res) => {
+    Order.findOne({ _id: req.body.oid })
+        .populate('UserId')
+        .populate('OrderItems.FoodId')
+        .then((result) => {
+            res.status(200).json(result)
+        }).catch((err) => {
+            res.status(500).send(err)
+        });
+}

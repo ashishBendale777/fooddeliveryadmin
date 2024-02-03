@@ -1,9 +1,12 @@
 import axios from 'axios'
 import React, { useEffect, useState } from 'react'
-import { Card, Col, Container, Row } from 'react-bootstrap'
+import { Button, Card, Col, Container, Row } from 'react-bootstrap'
+import { useNavigate } from 'react-router-dom'
+
 
 function MyAllOrder() {
-    const [orderData, setorderData] = useState([])
+  const [orderData, setorderData] = useState([])
+  const navi = useNavigate()
 
   useEffect(() => {
     axios.get('http://localhost:5000/api/allorder')
@@ -12,11 +15,11 @@ function MyAllOrder() {
       }).catch((err) => {
         console.log(err)
       })
-    }, [])
+  }, [])
 
   return (
     <div>
-        <Container>
+      <Container>
         <Row>
           {
             orderData.map((order) => {
@@ -29,13 +32,16 @@ function MyAllOrder() {
                       <h5>{order.NoOfItems}</h5>
                       <h5>{order.TotalAmt}</h5>
                     </Card.Body>
+                    <Card.Footer>
+                      <Button onClick={() => navi(`/orderdetails/${order._id}`)}>Details</Button>
+                    </Card.Footer>
                   </Card>
                 </Col>
               )
             })
           }
         </Row>
-        </Container>
+      </Container>
     </div>
   )
 }

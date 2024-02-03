@@ -1,4 +1,4 @@
-import axios from 'axios';
+5import axios from 'axios';
 import React, { useState } from 'react'
 import { Button, Col, Container, Form, Row } from 'react-bootstrap'
 
@@ -20,6 +20,7 @@ function MyAddFood() {
         axios.post("http://localhost:5000/api/addfood", food)
             .then((result) => {
                 alert("Food Added")
+                window.location.reload(false)
                 console.log(result.data)
             })
             .catch((err) => {
@@ -27,20 +28,21 @@ function MyAddFood() {
             })
     }
 
-    async function hnadlechangeimage(e){
+    async function hnadlechangeimage(e) {
         const imgData = new FormData();
         imgData.append(
             'image',
             e.target.files[0]
         );
         axios.post("http://localhost:5000/uploadfile", imgData)
-        .then((res) =>{
-            console.log("Res:",res.data);
-            setImage(res.data.filepath)
-        })
-        .catch((err) =>{
-            console.log("Err:", err);
-        });
+            .then((res) => {
+                console.log("Res:", res.data);
+                setImage(res.data.filepath)
+                alert('Image uploaded')
+            })
+            .catch((err) => {
+                console.log("Err:", err);
+            });
     }
 
 
